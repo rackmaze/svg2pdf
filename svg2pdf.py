@@ -1,9 +1,19 @@
 #!env python
+import sys
+import json
+
+class Logger:
+    def write(self,s):
+        sys.stdout.write('["log",' + json.dumps(s.rstrip('\n')) + ']\n')
+        sys.stdout.flush()
+sys.stderr = Logger()
+
 from bottle import get, post, run, request, response
 
 import timeit
 import logging
 import re
+import threading
 
 from svg2pdf.document import Document
 
@@ -43,8 +53,23 @@ def process():
             else:
                 log.warn("Non SVG/JSON input: %s -> %s" % (name, f.content_type))
         yield doc.finish()
-        
+
+
 if __name__ == '__main__':
+    sys.stdout.write('["get", "pdf", "port"]\n')
+    sys.stdout.flush()
+    port = int(json.loads(sys.stdin.readline()))
     log.addHandler(logging.StreamHandler())
-    log.setLevel(logging.DEBUG)
-    run(host='localhost', port=8001, debug=False)
+    log.setLevel(logging.INFO)
+    def httpd():
+        log.info("SVG2PDF running on port %d", port)
+        run(host='localhost', port=port, debug=False)
+    thrd = threading.Thread(target=httpd)
+    thrd.daemon = True
+    thrd.start()
+    # Wait for the stdin to close
+    try:
+        sys.stdin.readlines()
+    finally:
+        exit(0) 
+
