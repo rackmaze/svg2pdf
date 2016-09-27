@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name         = "svg2pdf",
-    version      = "0.7.0",
+    version      = "0.8.0",
     author       = "Rackmaze",
     author_email = "info@rackmaze.com",
     url          = "https://github.com/kika/svg2pdf",
